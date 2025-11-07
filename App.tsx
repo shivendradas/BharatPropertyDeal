@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 import SearchComponent from './component/SearchComponent';
 import AddComponent from './component/AddComponent';
 import Profile from './component/Profile';
@@ -24,11 +26,13 @@ function AppContent() {
   if (activeTab === 'home') {
     content = <SearchComponent isDarkMode={isDarkMode} />;
   } else if (activeTab === 'favorites') {
-    content = <AddComponent  isDarkMode={isDarkMode}/>;
+    content = <AddComponent isDarkMode={isDarkMode} />;
   } else if (activeTab === 'profile') {
     content = <Profile isDarkMode={isDarkMode} />;
   }
-
+  // Colors for active/inactive tabs
+  const activeColor = '#4CAF50';
+  const inactiveColor = isDarkMode ? '#fff' : '#000';
   return (
     <View
       style={[
@@ -42,13 +46,16 @@ function AppContent() {
       {/* Bottom navigation */}
       <View style={[styles.bottomNav, { backgroundColor: isDarkMode ? '#1e1e1e' : '#fff' }]}>
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('home')}>
-          <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Home</Text>
+          <Icon name={activeTab === 'home' ? 'home' : 'home-outline'} size={24} color={activeTab === 'home' ? activeColor : inactiveColor} />
+          <Text style={[styles.navText, { color: activeTab === 'home' ? activeColor : inactiveColor, fontWeight: activeTab === 'home' ? 'bold' : 'normal' }]}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('favorites')}>
-          <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Add</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('add')}>
+          <Icon name={activeTab === 'add' ? 'add-circle' : 'add-circle-outline'} size={24} color={activeTab === 'add' ? activeColor : inactiveColor} />
+          <Text style={[styles.navText, { color: activeTab === 'add' ? activeColor : inactiveColor, fontWeight: activeTab === 'add' ? 'bold' : 'normal' }]}>Add</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('profile')}>
-          <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Profile</Text>
+          <Icon name={activeTab === 'profile' ? 'person' : 'person-outline'} size={24} color={activeTab === 'profile' ? activeColor : inactiveColor} />
+          <Text style={[styles.navText, { color: activeTab === 'profile' ? activeColor : inactiveColor, fontWeight: activeTab === 'profile' ? 'bold' : 'normal' }]}>Profile</Text>
         </TouchableOpacity>
       </View>
     </View>
