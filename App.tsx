@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -7,51 +7,27 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   View,
-  FlatList,
-  Image,
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
-
-// Sample property data
-const properties = [
-  {
-    id: '1',
-    title: 'Modern Apartment',
-    price: '₹12,50,000',
-    location: 'Mumbai, India',
-    image:
-      'https://images.unsplash.com/photo-1600585154397-0b5d00db1cc3?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    id: '2',
-    title: 'Cozy Family House',
-    price: '₹24,00,000',
-    location: 'Bangalore, India',
-    image:
-      'https://images.unsplash.com/photo-1572120360610-d971b7b63e27?auto=format&fit=crop&w=800&q=60',
-  },
-  // add more properties here
-];
-
-function PropertyCard({ property }: { property: any }) {
-  return (
-    <View style={styles.card}>
-      <Image source={{ uri: property.image }} style={styles.cardImage} />
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardTitle}>{property.title}</Text>
-        <Text style={styles.cardLocation}>{property.location}</Text>
-        <Text style={styles.cardPrice}>{property.price}</Text>
-      </View>
-    </View>
-  );
-}
+import SearchComponent from './component/SearchComponent';
+import AddComponent from './component/AddComponent';
+import Profile from './component/Profile';
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
   const isDarkMode = useColorScheme() === 'dark';
+  const [activeTab, setActiveTab] = useState('home');
+
+  let content;
+  if (activeTab === 'home') {
+    content = <SearchComponent isDarkMode={isDarkMode} />;
+  } else if (activeTab === 'favorites') {
+    content = <AddComponent  isDarkMode={isDarkMode}/>;
+  } else if (activeTab === 'profile') {
+    content = <Profile isDarkMode={isDarkMode} />;
+  }
 
   return (
     <View
@@ -61,31 +37,17 @@ function AppContent() {
       ]}
     >
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-
-      {/* Search bar */}
-      <TextInput
-        style={[styles.searchBar, { backgroundColor: isDarkMode ? '#222' : '#fff', color: isDarkMode ? '#fff' : '#000' }]}
-        placeholder="Search properties"
-        placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
-      />
-
-      {/* Property listings */}
-      <FlatList
-        data={properties}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PropertyCard property={item} />}
-        contentContainerStyle={styles.listContent}
-      />
+      {content}
 
       {/* Bottom navigation */}
       <View style={[styles.bottomNav, { backgroundColor: isDarkMode ? '#1e1e1e' : '#fff' }]}>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('home')}>
           <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Favorites</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('favorites')}>
+          <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Add</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('profile')}>
           <Text style={[styles.navText, { color: isDarkMode ? '#fff' : '#000' }]}>Profile</Text>
         </TouchableOpacity>
       </View>
@@ -157,6 +119,11 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 16,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
