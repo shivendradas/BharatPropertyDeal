@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,44 +6,46 @@ import {
   View,
   FlatList,
   Image,
-  useColorScheme,
+  ActivityIndicator,
 } from 'react-native';
+import PropertyCard from './PropertyCard';
+import Config from '../config'; // or via environment variable
 
-// Sample property data
-const properties = [
-  {
-    id: '1',
-    title: 'Modern Apartment',
-    price: '₹12,50,000',
-    location: 'Mumbai, India',
-    image:
-      'https://images.unsplash.com/photo-1600585154397-0b5d00db1cc3?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    id: '2',
-    title: 'Cozy Family House',
-    price: '₹25,00,000',
-    location: 'Bangalore, India',
-    image:
-      'https://images.unsplash.com/photo-1572120360610-d971b7b63e27?auto=format&fit=crop&w=800&q=60',
-  },
-];
-
-// PropertyCard component
-function PropertyCard({ property }) {
-  return (
-    <View style={styles.card}>
-      <Image source={{ uri: property.image }} style={styles.cardImage} />
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardTitle}>{property.title}</Text>
-        <Text style={styles.cardLocation}>{property.location}</Text>
-        <Text style={styles.cardPrice}>{property.price}</Text>
-      </View>
-    </View>
-  );
-}
 
 export default function SearchComponent({ isDarkMode }) {
+  const [searchText, setSearchText] = useState('');
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const apiBaseUrl = Config.REACT_APP_API_URL; // Replace with your API base url
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Fetch all records when searchText is empty
+      fetchProperties(searchText.trim());
+    }, 500); // debounce 500ms
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const fetchProperties = async (query) => {
+    setLoading(true);
+    try {
+      // If query is empty, omit 'q' param or pass empty string depending on your API
+      const url = query
+        ? `${apiBaseUrl}/api/properties/search?q=${encodeURIComponent(query)}`
+        : `${apiBaseUrl}/api/properties/search`; // for all records
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setProperties(data);
+    } catch (error) {
+      console.error('Fetch properties error:', error);
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -54,10 +56,20 @@ export default function SearchComponent({ isDarkMode }) {
         ]}
         placeholder="Search properties"
         placeholderTextColor={isDarkMode ? '#aaa' : '#666'}
+        value={searchText}
+        onChangeText={setSearchText}
+        autoCapitalize="none"
+        autoCorrect={false}
       />
+      {loading && <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 10 }} />}
+      {!loading && properties.length === 0 && searchText.trim() !== '' && (
+        <Text style={{ textAlign: 'center', marginTop: 20, color: isDarkMode ? '#aaa' : '#666' }}>
+          No properties found.
+        </Text>
+      )}
       <FlatList
         data={properties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <PropertyCard property={item} />}
         contentContainerStyle={styles.listContent}
       />
