@@ -1,0 +1,3 @@
+export default {
+  REACT_APP_API_URL: 'https://buddysphereservice.onrender.com'
+};

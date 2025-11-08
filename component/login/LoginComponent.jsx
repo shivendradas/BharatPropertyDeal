@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Pressable, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
+import Config from '../../config'; // or via environment variable
 
 const LoginComponent = ({ onLogin, onCreateAccount }) => {
   //const navigation = useNavigation();
@@ -8,18 +11,44 @@ const LoginComponent = ({ onLogin, onCreateAccount }) => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    // Basic validation
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter email and password');
-      return;
+  const handleLogin = async () => {
+    //setMessage('');
+    setLoading(true);
+
+    try {
+      const apiBaseUrl = Config.REACT_APP_API_URL;
+      const response = await axios.post(`${apiBaseUrl}/api/registeruser/login`, {
+        email,
+        password,
+      });
+
+      const data = response.data;
+      //setMessage(data.message || 'Login successful!');
+
+      if (data.token) {
+        // ✅ Save to AsyncStorage instead of localStorage
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('email', email);
+
+        // ✅ Call parent onLogin callback if available
+        if (onLogin) {
+          onLogin({ email, token: data.token });
+        }
+
+        Alert.alert('Success', data.message || 'Logged in successfully!');
+      }
+    } catch (error) {
+      console.log('Login error:', error);
+      const errMsg =
+        error.response?.data?.message ||
+        'Login failed. Please check your credentials.';
+      Alert.alert('Error', errMsg);
+    } finally {
+      setLoading(false);
     }
-    // TODO: Replace with real auth (API call etc)
-    // Simulate successful login by returning dummy user object
-    const user = { email, name: 'Demo User', rememberMe };
-    onLogin(user);
   };
 
   return (
@@ -62,12 +91,21 @@ const LoginComponent = ({ onLogin, onCreateAccount }) => {
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={handleLogin}>
+      <TouchableOpacity
+        onPress={() => { if (!loading) handleLogin(); }}
+        disabled={loading}
+        activeOpacity={0.9}
+      >
         <LinearGradient
           colors={['#FF5733', '#FF3380']}
-          style={styles.loginButton}
+          style={[
+            styles.loginButton,
+            { opacity: loading ? 0.7 : 1 },
+          ]}
         >
-          <Text style={styles.loginText}>LOGIN</Text>
+          <Text style={styles.loginText}>
+            {loading ? 'Please wait...' : 'LOGIN'}
+          </Text>
         </LinearGradient>
       </TouchableOpacity>
       <Text style={styles.accountPrompt}>Don't have an Account?</Text>
