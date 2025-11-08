@@ -57,7 +57,7 @@ function AppContent() {
   } else if (activeTab === 'add') {
     content = <AddComponent isDarkMode={isDarkMode} />;
   } else if (activeTab === 'profile') {
-    content = <Profile isDarkMode={isDarkMode} />;
+    content = <Profile isDarkMode={isDarkMode} username={user} />;
   }
 
   const activeColor = '#4CAF50';
