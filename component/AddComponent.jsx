@@ -325,14 +325,17 @@ const AddComponent = ({ isDarkMode }) => {
         )}
 
         <TextInput
+          key="areaSqft"
           placeholder="Area (sq ft)"
           value={formData.areaSqft}
           onChangeText={(text) => handleChange('areaSqft', text)}
           style={inputStyle}
           keyboardType="numeric"
+          maxLength={5}
         />
 
         <TextInput
+        key="contactName"
           placeholder="Contact Name"
           value={formData.contactName}
           onChangeText={(text) => handleChange('contactName', text)}
@@ -340,6 +343,7 @@ const AddComponent = ({ isDarkMode }) => {
         />
 
         <TextInput
+          key="contactPhone"
           placeholder="Contact Phone"
           value={formData.contactPhone}
           onChangeText={(text) => handleChange('contactPhone', text)}
